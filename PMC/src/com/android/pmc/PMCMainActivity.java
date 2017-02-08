@@ -74,6 +74,7 @@ public class PMCMainActivity extends Activity {
     private PMCReceiver mPMCReceiver;
     private BleScanReceiver mBleScanReceiver;
     private GattPMCReceiver mGattPMCReceiver;
+    private A2dpReceiver mA2dpReceiver;
     private AlarmManager mAlarmManager;
     private PowerManager.WakeLock mWakeLock;
 
@@ -89,6 +90,7 @@ public class PMCMainActivity extends Activity {
         mPMCReceiver = new PMCReceiver();
         mBleScanReceiver = new BleScanReceiver(this, mAlarmManager);
         mGattPMCReceiver = new GattPMCReceiver(this, mAlarmManager);
+        mA2dpReceiver = new A2dpReceiver(this, mAlarmManager);
         setContentView(R.layout.activity_linear);
         mTextView = (TextView) findViewById(R.id.text_content);
         mRadioGroup = (RadioGroup) findViewById(R.id.rb_dataselect);
@@ -99,6 +101,7 @@ public class PMCMainActivity extends Activity {
         registerReceiver(mPMCReceiver, new IntentFilter(SETPARAMS_INTENT_STRING));
         registerReceiver(mBleScanReceiver, new IntentFilter(BleScanReceiver.BLE_SCAN_INTENT));
         registerReceiver(mGattPMCReceiver, new IntentFilter(GattPMCReceiver.GATTPMC_INTENT));
+        registerReceiver(mA2dpReceiver, new IntentFilter(A2dpReceiver.A2DP_INTENT));
     }
 
     @Override
