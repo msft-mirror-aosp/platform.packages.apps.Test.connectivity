@@ -59,7 +59,7 @@ public class GattClientListener extends BroadcastReceiver {
     private BluetoothGatt mBluetoothGatt;
     private GattCallback mGattCallback;
 
-    private MyBleScanner mBleScanner;
+    private MyBleScanner mMyBleScanner;
     private String mMacAddress;
     private BluetoothDevice mDevice;
     private int mWriteTime;
@@ -75,17 +75,22 @@ public class GattClientListener extends BroadcastReceiver {
         mContext = context;
         mAlarmManager = alarmManager;
         mBluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
+
         if (mBluetoothAdapter == null) {
-            Log.e(TAG, "BleAdaptor is Null");
+            Log.e(TAG, "BluetoothAdapter is Null");
             return;
         } else {
             if (!mBluetoothAdapter.isEnabled()) {
-                Log.d(TAG, "BleAdaptor is NOT enabled, enable now");
+                Log.d(TAG, "BluetoothAdapter is NOT enabled, enable now");
                 mBluetoothAdapter.enable();
+                if (!mBluetoothAdapter.isEnabled()) {
+                    Log.e(TAG, "Can't enable Bluetooth");
+                    return;
+                }
             }
         }
 
-        mBleScanner = new MyBleScanner(mBluetoothAdapter);
+        mMyBleScanner = new MyBleScanner(mBluetoothAdapter);
         mGattCallback = new GattCallback();
         mBluetoothGatt = null;
         mMacAddress = null;
@@ -107,7 +112,7 @@ public class GattClientListener extends BroadcastReceiver {
 
         if (intent == null) {
             // Start Scan here when this func is called for the first time
-            mBleScanner.startScan();
+            mMyBleScanner.startScan();
             mWriteTime = writeTime;
             mIdleTime = idleTime;
             mCycles = numCycles;
@@ -145,7 +150,7 @@ public class GattClientListener extends BroadcastReceiver {
             return;
         }
 
-        if (mMacAddress == null) mMacAddress = mBleScanner.getAdvMacAddress();
+        if (mMacAddress == null) mMacAddress = mMyBleScanner.getAdvMacAddress();
         if (mMacAddress == null || mMacAddress.isEmpty()) {
             Log.e(TAG, "Remote device Mac Address is not set");
             return;
@@ -323,21 +328,30 @@ public class GattClientListener extends BroadcastReceiver {
          */
         public void startScan() {
             // Start Scan here when this func is called for the first time
-            mBLEScanner.startScan(mScanFilterList, mScanSettings, mScanCallback);
+            if (mBLEScanner != null) {
+                mBLEScanner.startScan(mScanFilterList, mScanSettings, mScanCallback);
+            } else {
+                Log.e(TAG, "BLEScanner is null");
+            }
+
         }
 
         /**
          * Wrapper function to stop BLE Scanning
          */
         public void stopScan() {
-            mBLEScanner.stopScan(mScanCallback);
+            if (mBLEScanner != null) {
+                mBLEScanner.stopScan(mScanCallback);
+            } else {
+                Log.e(TAG, "BLEScanner is null");
+            }
         }
 
         /**
          * function to get Mac Address for BLE Advertiser device
          */
         public String getAdvMacAddress() {
-            // wait to get Mac Address for Ble Advertiser
+            // Return Mac address for Advertiser device
             return mAdvMacAddress;
         }
 
