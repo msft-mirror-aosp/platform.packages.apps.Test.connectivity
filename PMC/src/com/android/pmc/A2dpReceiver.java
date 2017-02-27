@@ -52,7 +52,7 @@ public class A2dpReceiver extends BroadcastReceiver {
     public static final int START_PLAY = 1;
     public static final int PAUSE_PLAY = 2;
     public static final int STOP_PLAY = 3;
-    public static final float NORMAL_VOLUME = 0.5f;
+    public static final float NORMAL_VOLUME = 0.3f;
     public static final float ZERO_VOLUME = 0.0f;
 
     private final Context mContext;
@@ -330,6 +330,9 @@ public class A2dpReceiver extends BroadcastReceiver {
             Log.v(TAG, "Before Start Play");
             mPlayer.start();
             mPlayer.setLooping(true);
+            if (!mPlayer.isPlaying()) {
+                Log.e(TAG, "Media Player is not playing");
+            }
             startAlarm(mPlayTime, intent);
         } else if (action == PAUSE_PLAY) {
             Log.v(TAG, "Before Pause play");
