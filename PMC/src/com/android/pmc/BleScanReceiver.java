@@ -81,15 +81,21 @@ public class BleScanReceiver extends BroadcastReceiver {
          */
         public BleScanListener() {
             BluetoothAdapter bleAdaptor = BluetoothAdapter.getDefaultAdapter();
+
             if (bleAdaptor == null) {
-                Log.e(TAG, "BleAdaptor is Null");
+                Log.e(TAG, "BluetoothAdapter is Null");
                 return;
             } else {
                 if (!bleAdaptor.isEnabled()) {
-                    Log.e(TAG, "BleAdaptor is NOT enabled");
-                    return;
+                    Log.d(TAG, "BluetoothAdapter is NOT enabled, enable now");
+                    bleAdaptor.enable();
+                    if (!bleAdaptor.isEnabled()) {
+                        Log.e(TAG, "Can't enable Bluetooth");
+                        return;
+                    }
                 }
             }
+
             mBleScanner = bleAdaptor.getBluetoothLeScanner();
             mScanFilterList = new ArrayList<ScanFilter>();
         }
