@@ -39,7 +39,6 @@ LOCAL_SHARED_LIBRARIES += \
   libcutils \
   libutils \
   libhardware \
-  libwifi-hal \
   libwifi-system \
   liblog
 
