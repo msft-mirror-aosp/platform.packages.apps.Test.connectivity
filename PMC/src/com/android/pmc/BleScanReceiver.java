@@ -80,6 +80,7 @@ public class BleScanReceiver extends BroadcastReceiver {
          *
          */
         public BleScanListener() {
+            Log.d(TAG, "Start BleScanListener()");
             BluetoothAdapter bleAdaptor = BluetoothAdapter.getDefaultAdapter();
 
             if (bleAdaptor == null) {
@@ -98,6 +99,7 @@ public class BleScanReceiver extends BroadcastReceiver {
 
             mBleScanner = bleAdaptor.getBluetoothLeScanner();
             mScanFilterList = new ArrayList<ScanFilter>();
+            Log.d(TAG, "End BleScanListener()");
         }
 
         /**
