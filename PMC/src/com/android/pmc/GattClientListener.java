@@ -72,6 +72,7 @@ public class GattClientListener extends BroadcastReceiver {
      * @param alarmManager - system will provide a AlarmManager to this function
      */
     public GattClientListener(Context context, AlarmManager alarmManager) {
+        Log.d(TAG, "Start GattClientListener()");
         mContext = context;
         mAlarmManager = alarmManager;
         mBluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
@@ -95,6 +96,7 @@ public class GattClientListener extends BroadcastReceiver {
         mBluetoothGatt = null;
         mMacAddress = null;
         mDevice = null;
+        Log.d(TAG, "End GattClientListener");
     }
 
     /**

@@ -40,6 +40,8 @@ public class GattPMCReceiver extends BroadcastReceiver {
      * @param alarmManager - PMC will provide alarmManager
      */
     public GattPMCReceiver(Context context, AlarmManager alarmManager) {
+        Log.d(TAG, "Start GattPMCReceiver()");
+
         // Prepare for setting alarm service
         mGattClientListener = new GattClientListener(context, alarmManager);
         mGattServer = new GattServer(context);
@@ -47,6 +49,7 @@ public class GattPMCReceiver extends BroadcastReceiver {
         // RegisterAlarmReceiver for GattListener
         context.registerReceiver(mGattClientListener,
                 new IntentFilter(GattClientListener.GATTCLIENT_ALARM));
+        Log.d(TAG, "Start GattPMCReceiver()");
     }
 
     /**

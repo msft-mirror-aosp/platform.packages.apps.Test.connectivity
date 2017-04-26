@@ -59,6 +59,7 @@ public class GattServer {
      * @param context - System will provide a context
      */
     public GattServer(Context context) {
+        Log.d(TAG, "Start GattServer()");
         mContext = context;
         // Check if Bluetooth is enabled
         BluetoothAdapter bluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
@@ -102,7 +103,7 @@ public class GattServer {
 
         // Create BLE Advertiser object
         mBleAdvertiser = new MyBleAdvertiser(bluetoothAdapter);
-        Log.d(TAG, "Construstor finished");
+        Log.d(TAG, "End GattServer()");
     }
 
     /**
