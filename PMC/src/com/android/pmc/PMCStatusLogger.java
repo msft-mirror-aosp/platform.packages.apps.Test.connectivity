@@ -18,11 +18,15 @@ package com.android.pmc;
 
 import android.util.Log;
 
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+
 import java.io.BufferedWriter;
 import java.io.File;
-import java.io.FileOutputStream;
+import java.io.FileWriter;
 import java.io.IOException;
-import java.io.OutputStreamWriter;
+
 
 /**
  * Logging class to log status so PMC can communicate the status back to client
@@ -31,6 +35,8 @@ public class PMCStatusLogger {
     private File mFile;
     public static String TAG;
     public static String LOG_DIR = "/mnt/sdcard/Download";
+    public static JSONObject mJObject;
+    public static JSONArray mJArray;
 
     /**
      * Construtor - check if the file exist. If it is delete and create a new.
@@ -41,12 +47,14 @@ public class PMCStatusLogger {
         TAG = tag;
 
         try {
-            mFile = new File(LOG_DIR + fileName);
+            mFile = new File(LOG_DIR + "/" + fileName);
             if (mFile.exists()) mFile.delete();
             mFile.createNewFile();
         } catch (IOException e) {
             Log.e(TAG, "Exception creating log file: " + fileName + " " + e);
         }
+        mJObject = new JSONObject();
+        mJArray = new JSONArray();
     }
 
     /**
@@ -56,8 +64,8 @@ public class PMCStatusLogger {
      */
     public void logStatus(String message) {
         try {
-            FileOutputStream fos = new FileOutputStream(mFile, true);
-            BufferedWriter bw = new BufferedWriter(new OutputStreamWriter(fos));
+            FileWriter fos = new FileWriter(mFile);
+            BufferedWriter bw = new BufferedWriter(fos);
             bw.write(message);
             bw.newLine();
             bw.close();
@@ -65,5 +73,44 @@ public class PMCStatusLogger {
             Log.e(TAG, "Exception writing log: " + message + " " + e);
         }
     }
+
+    /**
+     * Function to add alarm times into JSONArray object
+     *
+     * @param startTime - Start time for the cycle
+     * @param endTime - End time for the cycle
+     */
+    public void logAlarmTimes(double startTime, double endTime) {
+        JSONObject obj = new JSONObject();
+        try {
+            obj.put("StartTime", startTime);
+            obj.put("EndTime", endTime);
+            mJArray.put(obj);
+        } catch (JSONException e) {
+            Log.e(TAG, "Exception to put Alarm Times into JSONArray: " + e);
+        }
+    }
+
+    /**
+     * Function to save Json object into log file
+     *
+     */
+    public void flash() {
+        try {
+            mJObject.put("AlarmTimes", mJArray);
+
+            FileWriter fos = new FileWriter(mFile);
+            BufferedWriter bw = new BufferedWriter(fos);
+            Log.v(TAG, "JSON: " + mJObject.toString());
+            bw.write(mJObject.toString());
+            bw.newLine();
+            bw.close();
+        } catch (JSONException e) {
+            Log.e(TAG, "Exception to put JSONArray into main JSON object: " + e);
+        } catch (IOException e) {
+            Log.e(TAG, "Exception writing JSON to log file: " + e);
+        }
+    }
+
 }
 
