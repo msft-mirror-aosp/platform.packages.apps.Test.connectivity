@@ -50,6 +50,10 @@ public class BleScanReceiver extends BroadcastReceiver {
     private BluetoothLeScanner mBleScanner;
     private ScanSettings mScanSettings;
     private List<ScanFilter> mScanFilterList;
+    // Use PMCStatusLogger to send status and start & end times back to Python client
+    private PMCStatusLogger mPMCStatusLogger;
+    // Test start time is set when receiving the broadcast message from Python client
+    private long mStartTestTime;
 
     private ScanCallback mScanCallback = new ScanCallback() {
         @Override
@@ -74,12 +78,16 @@ public class BleScanReceiver extends BroadcastReceiver {
         private int mScanTime;
         private int mNoScanTime;
         private int mNumAlarms;
+        private int mFirstScanTime;
+        private long mScanStartTime;
+        private long mScanEndTime;
 
         /**
          * Constructor
          *
          */
         public BleScanListener() {
+            Log.d(TAG, "Start BleScanListener()");
             BluetoothAdapter bleAdaptor = BluetoothAdapter.getDefaultAdapter();
 
             if (bleAdaptor == null) {
@@ -98,6 +106,7 @@ public class BleScanReceiver extends BroadcastReceiver {
 
             mBleScanner = bleAdaptor.getBluetoothLeScanner();
             mScanFilterList = new ArrayList<ScanFilter>();
+            Log.d(TAG, "End BleScanListener()");
         }
 
         /**
@@ -117,14 +126,15 @@ public class BleScanReceiver extends BroadcastReceiver {
             mScanTime = scanTime;
             mNoScanTime = noScanTime;
             mNumAlarms = numAlarms;
+            mFirstScanTime = startTime;
+
             mScanSettings = new ScanSettings.Builder().setScanMode(
                                             scanMode).build();
 
             Intent alarmIntent = new Intent(BleScanListener.BLESCAN);
             alarmIntent.putExtra("com.android.pmc.BLESCAN.Action", START_SCAN);
             alarmIntent.putExtra("com.android.pmc.BLESCAN.CurrentAlarm", INIT_ALARM_NO);
-            long triggerTime = SystemClock.elapsedRealtime()
-                               + startTime * 1000;
+            long triggerTime = SystemClock.elapsedRealtime() + startTime * 1000;
             mAlarmManager.setExactAndAllowWhileIdle(
                           AlarmManager.ELAPSED_REALTIME_WAKEUP, triggerTime,
                           PendingIntent.getBroadcast(mContext, 0,
@@ -149,6 +159,7 @@ public class BleScanReceiver extends BroadcastReceiver {
                 return;
             }
             if (currentAlarm >= mNumAlarms) {
+                mPMCStatusLogger.flash();  // To flash out timestamps into log file
                 Log.d(TAG, "All alarms are done");
                 return;
             }
@@ -183,13 +194,22 @@ public class BleScanReceiver extends BroadcastReceiver {
             }
             if (action == START_SCAN) {
                 Log.v(TAG, "Before Start Scan");
+                mScanStartTime = System.currentTimeMillis();
                 mBleScanner.startScan(mScanFilterList, mScanSettings,
                                  mScanCallback);
                 repeatAlarm(intent, mScanTime, STOP_SCAN);
             } else if (action == STOP_SCAN) {
                 Log.v(TAG, "Before Stop scan");
+                mScanEndTime = System.currentTimeMillis();
+                mPMCStatusLogger.logAlarmTimes(mScanStartTime / 1000.0, mScanEndTime / 1000.0);
                 mBleScanner.stopScan(mScanCallback);
-                repeatAlarm(intent, mNoScanTime, START_SCAN);
+                if ((mScanEndTime - mStartTestTime)
+                        < ((mScanTime + mNoScanTime) * mNumAlarms / 2 + mFirstScanTime) * 1000) {
+                    repeatAlarm(intent, mNoScanTime, START_SCAN);
+                } else {
+                    mPMCStatusLogger.flash();  // To flash out timestamps into log file
+                    Log.d(TAG, "Time is up to end");
+                }
             } else {
                 Log.e(TAG, "Unknown Action");
             }
@@ -227,6 +247,9 @@ public class BleScanReceiver extends BroadcastReceiver {
             int scanMode = -1, startTime = 0, scanTime = 0, noScanTime = 0;
             int repetitions = 1;
             String str;
+
+            mStartTestTime = System.currentTimeMillis();
+            mPMCStatusLogger = new PMCStatusLogger(TAG + ".log", TAG);
 
             if (extras == null) {
                 Log.e(TAG, "No parameters specified");
@@ -277,6 +300,12 @@ public class BleScanReceiver extends BroadcastReceiver {
             }
             mAlarmScanListener.firstAlarm(scanMode, startTime,
                                        scanTime, noScanTime, repetitions * 2);
+            if (mBleScanner != null && mScanFilterList != null && mScanSettings != null
+                                 && mScanCallback != null) {
+                mPMCStatusLogger.logStatus("READY");
+            } else {
+                Log.e(TAG, "BLE scanner is not ready to start test");
+            }
         }
     }
 }
