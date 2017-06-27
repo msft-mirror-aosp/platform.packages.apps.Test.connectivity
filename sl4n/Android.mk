@@ -45,7 +45,7 @@ LOCAL_SHARED_LIBRARIES += \
 LOCAL_STATIC_LIBRARIES += \
   libbtcore \
   libosi \
-  libbluetooth-client
+  libbluetooth-binder-common
 
 LOCAL_STATIC_LIBRARIES += \
   libnl \
