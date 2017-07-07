@@ -43,6 +43,7 @@ LOCAL_SHARED_LIBRARIES += \
   liblog
 
 LOCAL_STATIC_LIBRARIES += \
+  libbluetooth-types \
   libbtcore \
   libosi \
   libbluetooth-binder-common
