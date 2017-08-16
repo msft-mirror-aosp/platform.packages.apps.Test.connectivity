@@ -52,6 +52,6 @@ LOCAL_STATIC_LIBRARIES += \
   libnl \
 
 
-LOCAL_CFLAGS += -std=c++11 -Wall -Wno-unused-parameter -Wno-missing-field-initializers
+LOCAL_CFLAGS += -Wall -Wno-unused-parameter -Wno-missing-field-initializers
 
 include $(BUILD_EXECUTABLE)
