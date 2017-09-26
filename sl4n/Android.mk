@@ -43,14 +43,11 @@ LOCAL_SHARED_LIBRARIES += \
   liblog
 
 LOCAL_STATIC_LIBRARIES += \
-  libbluetooth-types \
   libbtcore \
   libosi \
-  libbluetooth-binder-common
-
-LOCAL_STATIC_LIBRARIES += \
   libnl \
-
+  libbluetooth-binder-common \
+  libbluetooth-types
 
 LOCAL_CFLAGS += -Wall -Wno-unused-parameter -Wno-missing-field-initializers
 
