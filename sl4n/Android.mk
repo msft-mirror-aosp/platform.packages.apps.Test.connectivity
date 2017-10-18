@@ -23,6 +23,7 @@ LOCAL_MODULE := sl4n
 
 LOCAL_C_INCLUDES += \
   system/bt \
+  system/bt/include \
   $(LOCAL_PATH)/rapidjson/include \
   $(LOCAL_PATH)/facades
 
@@ -38,7 +39,6 @@ LOCAL_SHARED_LIBRARIES += \
   libchrome \
   libcutils \
   libutils \
-  libhardware \
   libwifi-system \
   liblog
 
