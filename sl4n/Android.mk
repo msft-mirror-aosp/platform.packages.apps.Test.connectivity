@@ -23,6 +23,7 @@ LOCAL_MODULE := sl4n
 
 LOCAL_C_INCLUDES += \
   system/bt \
+  system/bt/include \
   $(LOCAL_PATH)/rapidjson/include \
   $(LOCAL_PATH)/facades
 
@@ -38,20 +39,16 @@ LOCAL_SHARED_LIBRARIES += \
   libchrome \
   libcutils \
   libutils \
-  libhardware \
-  libwifi-hal \
   libwifi-system \
   liblog
 
 LOCAL_STATIC_LIBRARIES += \
   libbtcore \
   libosi \
-  libbluetooth-client
-
-LOCAL_STATIC_LIBRARIES += \
   libnl \
+  libbluetooth-binder-common \
+  libbluetooth-types
 
-
-LOCAL_CFLAGS += -std=c++11 -Wall -Wno-unused-parameter -Wno-missing-field-initializers
+LOCAL_CFLAGS += -Wall -Wno-unused-parameter -Wno-missing-field-initializers
 
 include $(BUILD_EXECUTABLE)

@@ -23,6 +23,7 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.net.ConnectivityManager;
 import android.net.wifi.WifiScanner;
 import android.net.wifi.WifiScanner.ChannelSpec;
 import android.net.wifi.WifiScanner.ScanSettings;
@@ -68,27 +69,40 @@ public class PMCMainActivity extends Activity {
     private WifiGScanReceiver mGScanR = null;
     private WifiDownloadReceiver mDR = null;
     private IperfClient mIperfClient = null;
+    private boolean mTethered = false;
     private RadioGroup mRadioGroup;
     private Button mBtnStart;
     private Button mBtnStop;
     private PMCReceiver mPMCReceiver;
     private BleScanReceiver mBleScanReceiver;
     private GattPMCReceiver mGattPMCReceiver;
+    private A2dpReceiver mA2dpReceiver;
     private AlarmManager mAlarmManager;
     private PowerManager.WakeLock mWakeLock;
+    private ConnectivityManager mConnManager;
+    private int mProvisionCheckSleep = 1250;
 
+    class OnStartTetheringCallback extends ConnectivityManager.OnStartTetheringCallback {
+        @Override
+        public void onTetheringStarted() {
+            mTethered = true;
+        }
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         //Initiate wifi service manger
         mAlarmManager = (AlarmManager) getSystemService(Context.ALARM_SERVICE);
+        mConnManager = (ConnectivityManager)
+                this.getApplicationContext().getSystemService(Context.CONNECTIVITY_SERVICE);
         mPIGScan = PendingIntent.getBroadcast(this, 0, new Intent(sGScanAction), 0);
         mPIDownload = PendingIntent.getBroadcast(this, 0, new Intent(sDownloadAction), 0);
         mPIConnScan = PendingIntent.getBroadcast(this, 0, new Intent(sConnScanAction), 0);
         mPMCReceiver = new PMCReceiver();
         mBleScanReceiver = new BleScanReceiver(this, mAlarmManager);
         mGattPMCReceiver = new GattPMCReceiver(this, mAlarmManager);
+        mA2dpReceiver = new A2dpReceiver(this, mAlarmManager);
         setContentView(R.layout.activity_linear);
         mTextView = (TextView) findViewById(R.id.text_content);
         mRadioGroup = (RadioGroup) findViewById(R.id.rb_dataselect);
@@ -99,6 +113,7 @@ public class PMCMainActivity extends Activity {
         registerReceiver(mPMCReceiver, new IntentFilter(SETPARAMS_INTENT_STRING));
         registerReceiver(mBleScanReceiver, new IntentFilter(BleScanReceiver.BLE_SCAN_INTENT));
         registerReceiver(mGattPMCReceiver, new IntentFilter(GattPMCReceiver.GATTPMC_INTENT));
+        registerReceiver(mA2dpReceiver, new IntentFilter(A2dpReceiver.A2DP_INTENT));
     }
 
     @Override
@@ -142,6 +157,9 @@ public class PMCMainActivity extends Activity {
                     case R.id.rb_iperf_client:
                         startIperfClient();
                         break;
+                    case R.id.rb_usb_tethering:
+                        startUSBTethering();
+                        break;
                     default:
                         return;
                 }
@@ -155,6 +173,7 @@ public class PMCMainActivity extends Activity {
                 stopDownloadFile();
                 stopGScan();
                 stopIperfClient();
+                stopUSBTethering();
                 mBtnStart.setEnabled(true);
             }
         });
@@ -283,6 +302,32 @@ public class PMCMainActivity extends Activity {
         }
     }
 
+    private void startUSBTethering() {
+        OnStartTetheringCallback tetherCallback = new OnStartTetheringCallback();
+        mConnManager.startTethering(ConnectivityManager.TETHERING_USB, true, tetherCallback);
+        // sleep until provisioning check for tethering is done
+        try {
+            Thread.sleep(mProvisionCheckSleep);
+        } catch (InterruptedException e) {
+            Log.d(TAG, "Sleep exception after enabling USB tethering");
+        }
+        if (mTethered) {
+            mBtnStart.setEnabled(false);
+            mRadioGroup.setFocusable(false);
+            mTextView.setText("Started usb tethering");
+        }
+    }
+
+    private void stopUSBTethering() {
+        if (mTethered) {
+            mConnManager.stopTethering(ConnectivityManager.TETHERING_USB);
+            mTethered = false;
+            mBtnStart.setEnabled(true);
+            mRadioGroup.setFocusable(true);
+            mTextView.setText("Stopped usb tethering");
+        }
+    }
+
     private void turnScreenOn(Context context) {
         if (mWakeLock == null) {
             PowerManager pm = (PowerManager) context.getSystemService(Context.POWER_SERVICE);
@@ -392,6 +437,10 @@ public class PMCMainActivity extends Activity {
                             startIperfClient();
                         } else if (actionstring.equalsIgnoreCase("StopIperfClient")) {
                             stopIperfClient();
+                        } else if (actionstring.equalsIgnoreCase("StartUSBTethering")) {
+                            startUSBTethering();
+                        } else if (actionstring.equalsIgnoreCase("StopUSBTethering")) {
+                            stopUSBTethering();
                         } else if (actionstring.equalsIgnoreCase("TurnScreenOn")) {
                             turnScreenOn(context);
                         } else if (actionstring.equalsIgnoreCase("TurnScreenOff")) {

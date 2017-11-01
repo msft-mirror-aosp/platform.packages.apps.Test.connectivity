@@ -97,7 +97,7 @@ public class WifiGScanReceiver extends BroadcastReceiver {
             int waitCount = 0;
             try {
                 mScanCompleted = false;
-                mScan.startScan(settings[0], mWifiScanListener);
+                mScan.startBackgroundScan(settings[0], mWifiScanListener);
                 while (!mScanCompleted) {
                     if (waitCount >= 100) {
                         return "Timeout, scan results avaiable action didn't triggered";
@@ -114,7 +114,7 @@ public class WifiGScanReceiver extends BroadcastReceiver {
                 Log.e(PMCMainActivity.TAG, e.toString());
                 return e.toString();
             } finally {
-                mScan.stopScan(mWifiScanListener);
+                mScan.stopBackgroundScan(mWifiScanListener);
             }
             return null;
         }

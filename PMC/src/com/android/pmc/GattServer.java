@@ -59,18 +59,25 @@ public class GattServer {
      * @param context - System will provide a context
      */
     public GattServer(Context context) {
+        Log.d(TAG, "Start GattServer()");
         mContext = context;
         // Check if Bluetooth is enabled
-        BluetoothAdapter betoothAdapter = BluetoothAdapter.getDefaultAdapter();
-        if (betoothAdapter == null) {
-            Log.e(TAG, "BleAdaptor is Null");
+        BluetoothAdapter bluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
+
+        if (bluetoothAdapter == null) {
+            Log.e(TAG, "BluetoothAdapter is Null");
             return;
         } else {
-            if (!betoothAdapter.isEnabled()) {
-                Log.d(TAG, "BleAdaptor is NOT enabled, enable now");
-                betoothAdapter.enable();
+            if (!bluetoothAdapter.isEnabled()) {
+                Log.d(TAG, "BluetoothAdapter is NOT enabled, enable now");
+                bluetoothAdapter.enable();
+                if (!bluetoothAdapter.isEnabled()) {
+                    Log.e(TAG, "Can't enable Bluetooth");
+                    return;
+                }
             }
         }
+
         // Prepare data for GATT service
         mBluetoothManager = (BluetoothManager) context.getSystemService(
                                 Service.BLUETOOTH_SERVICE);
@@ -95,8 +102,8 @@ public class GattServer {
         mGattService.addCharacteristic(characteristic);
 
         // Create BLE Advertiser object
-        mBleAdvertiser = new MyBleAdvertiser(betoothAdapter);
-        Log.d(TAG, "Construstor finished");
+        mBleAdvertiser = new MyBleAdvertiser(bluetoothAdapter);
+        Log.d(TAG, "End GattServer()");
     }
 
     /**
