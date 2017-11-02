@@ -49,6 +49,7 @@ LOCAL_STATIC_LIBRARIES += \
   libbluetooth-binder-common \
   libbluetooth-types
 
-LOCAL_CFLAGS += -Wall -Wno-unused-parameter -Wno-missing-field-initializers
+LOCAL_CFLAGS += -Wall -Werror
+LOCAL_CFLAGS += -Wno-unused-parameter -Wno-missing-field-initializers
 
 include $(BUILD_EXECUTABLE)
