@@ -5,6 +5,7 @@ LOCAL_JAVA_LIBRARIES := bouncycastle conscrypt
 LOCAL_STATIC_JAVA_LIBRARIES := android-support-v4 android-support-v13 jsr305
 
 LOCAL_PACKAGE_NAME := PMC
+LOCAL_PRIVATE_PLATFORM_APIS := true
 LOCAL_CERTIFICATE := platform
 LOCAL_DEX_PREOPT := false
 
