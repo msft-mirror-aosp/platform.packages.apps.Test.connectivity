@@ -14,7 +14,7 @@ cc_binary {
         "libbluetooth_headers",
     ],
     include_dirs: [
-        "system/bt",
+        "packages/modules/Bluetooth/system",
     ],
     local_include_dirs: [
         "rapidjson/include",
