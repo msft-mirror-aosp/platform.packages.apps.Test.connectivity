@@ -404,7 +404,7 @@ public class A2dpReceiver extends BroadcastReceiver {
         List<BluetoothCodecConfig> codecsSelectableCapabilities = new ArrayList<>();
 
         if (mBluetoothA2dp != null) {
-            BluetoothDevice activeDevice = mBluetoothA2dp.getActiveDevice();
+            BluetoothDevice activeDevice = getA2dpActiveDevice();
             if (activeDevice == null) {
                 Log.e(TAG, "getCodecValue: Active device is null");
                 return null;
@@ -478,13 +478,13 @@ public class A2dpReceiver extends BroadcastReceiver {
         }
 
         if (mBluetoothA2dp != null) {
-            BluetoothDevice activeDevice = mBluetoothA2dp.getActiveDevice();
+            BluetoothDevice activeDevice = getA2dpActiveDevice();
             if (activeDevice == null) {
                 Log.e(TAG, "setCodecValue: Active device is null. Codec is not set.");
                 return false;
             }
             Log.d(TAG, "setCodecConfigPreference()");
-            mBluetoothA2dp.setCodecConfigPreference(mBluetoothA2dp.getActiveDevice(), codecConfig);
+            mBluetoothA2dp.setCodecConfigPreference(getA2dpActiveDevice(), codecConfig);
         } else {
             Log.e(TAG, "mBluetoothA2dp is null. Codec is not set");
             return false;
@@ -507,6 +507,15 @@ public class A2dpReceiver extends BroadcastReceiver {
             return false;
         }
         return true;
+    }
+
+    private BluetoothDevice getA2dpActiveDevice() {
+        if (mBluetoothAdapter == null) {
+            return null;
+        }
+        List<BluetoothDevice> activeDevices =
+                mBluetoothAdapter.getActiveDevices(BluetoothProfile.A2DP);
+        return (activeDevices.size() > 0) ? activeDevices.get(0) : null;
     }
 
     /**
